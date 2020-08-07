@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+​
+
+<head>
+  <meta charset="utf-8">
+  <title>Weather Forcast</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css"
+    integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css" />
+  <nav class="navbar navbar-dark bg-dark">
+    <span class="navbar-brand">
+      <h1>Weather Dashboard</h1>
+    </span>
+  </nav>
+</head>
+
+<body>
+  
+  <div class="container">
+    <h4>Search for City</h4>
+  </div>
+  <input type="text" id="city">
+  <button type="button" class="btn btn-primary">Search</button>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-6">
+        <h4>City Name: <span class="city">
+          </span></h4>
+        </span>
+        <div>Wind Speed: <span class="wind"></span></div>
+        <div>Humidity: <span class="humidity"></span></div>
+        <div>Temperature: <span class="temp"></span></div>
+        <div>UV Index: <span class="uv-index"></span></div>
+
+        
+
+          <h3>5-Day Forcast:</h3>
+
+          <div id="forcast" class='row'></div>
+
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+          integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+          crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"
+          integrity="sha384-XEerZL0cuoUbHE4nZReLT7nx9gQrQreJekYhJD9WNWhH8nEW+0c5qq7aIo2Wl30J"
+          crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&family=Orbitron&family=Philosopher:ital@1&display=swap"
+          rel="stylesheet">
+        <script type="text/javascript">
+
+          // API Key
+          $(".btn").on("click", function () {
+            var cityName = $("#city").val().trim();
+
+            var APIKey = "9c9ff60032b1b9a351936d4875fa12e6";
+
+            // Here is the URL we need to query the database
+            var queryURL1 = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=" + APIKey;
+            var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=Miami,Florida,US&appid=" + APIKey;
+
+            //AJAX call Query URL 1 
+            $.ajax({
+              url: queryURL1,
+              method: "GET"
+            }).then(function (response) {
+              console.log(queryURL1)
+              console.log(response)
+
+              //variables for latatude longitude and tempetures 
+              var lat = response.coord.lat
+              var lon = response.coord.lon
+              var kelvinTemp = response.main.temp;
+              var farTemp = (kelvinTemp - 273.15) * 1.80 + 32
+              console.log(farTemp)
+              $(".temp").text(farTemp);
+              $(".city").text(response.name);
+              $(".wind").text(response.wind.speed);
+              $(".humidity").text(response.main.humidity);
+
+              //getting the lat and lon from the api 
+              $.get("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&units=imperial&appid=33f1f16d5d01d5e55c70bfe9c8dcb112").then(function (data) {
+                console.log(data)
+                $(".uv-index").text(data.current.uvi);
+                var forcast = $("#forcast")
+                for (var i = 1; i <= 5; i++) {
+                  var date = moment(data.daily[i].dt, "X").format("MM/DD/YYYY")
+                  var temp = data.daily[i].temp.day
+                  var iconcode = data.daily[i].weather[0].icon;
+                  var humidity = data.daily[i].humidity;
+                  var iconurl = "http://openweathermap.org/img/w/" + iconcode + ".png";
+                  var htmlStr = `<div class="card col" style="width: 18rem; background: rgb(73, 155, 250); ">
+                       <h5 class="card-title">${date}</h5>
+                      <div class="card-body">
+                        <img class="wicon" src=${iconurl} alt="Weather icon">
+                       <h6 class="card-subtitle">${temp}</h6>
+                       <h6 class="humidity">${humidity}</h6>
+                      </div>
+                    </div>`
+                  forcast.append(htmlStr);
+                  console.log(moment(data.daily[i].dt, "X").format("MM/DD/YYYY"))
+                }
+              });
+
+            });
+          })
+
+        </script>
+</body>
+
+</html>
